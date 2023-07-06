@@ -1,8 +1,19 @@
 const { User } = require("../models");
 const jwt = require("jsonwebtoken");
 const appError = require("../utils/appError");
+const nodemailer = require("nodemailer");
 // const bcrypt = require('bcrypt');
 const otpGenerator = require("otp-generator");
+// const transporter = nodemailer.createTransport({
+//   service: "gmail",
+//   host: "sandbox.smtp.mailtrap.io",
+//   port: 25,
+
+//   auth: {
+//     user: "2bade481c14129",
+//     pass: "3eae85a648ca98",
+//   },
+// });
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
@@ -31,11 +42,22 @@ exports.signup = async (req, res, next) => {
       verificationCode,
       verificationCodeExpiresAt,
     });
-    const token = signToken(newUser.id);
-
+    // const mailOptions = {
+    //   from: process.env.EVENT_HUB_EMAIL,
+    //   to: email,
+    //   subject: "Hello from NodeMailer",
+    //   text: verificationCode,
+    // };
+    // console.log("be")
+    // transporter.sendMail(mailOptions, (error, info) => {
+    //   if (error) {
+    //     console.error("here is error:",error);
+    //   } else {
+    //     console.log("Email sent:", info.response);
+    //   }
+    // });
     res.status(201).json({
       status: "success",
-      token,
       data: {
         user: newUser,
         otp: verificationCode,
@@ -128,9 +150,9 @@ exports.login = async (req, res, next) => {
 
 exports.resetPassword = async (req, res) => {
   try {
-    console.log("user")
-    console.log("user")
-    console.log(req.auth)
+    console.log("user");
+    console.log("user");
+    console.log(req.auth);
     const user = await User.scope("withCreditionals").findOne({
       where: { id: req.auth.id },
     });
